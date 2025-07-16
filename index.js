@@ -1,20 +1,20 @@
-// index.js
-
-const { default: makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys');
+const { default: makeWASocket, useSingleFileAuthState } = require('@whiskeysockets/baileys');
 const axios = require('axios');
+const fs = require('fs');
 
-// La URL del webhook la tomamos desde la variable de entorno configurada en Railway
 const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL;
 
 async function startBot() {
-    const { state, saveCreds } = await useMultiFileAuthState('session');
+    const authFile = './auth_info.json';
+
+    const { state, saveState } = useSingleFileAuthState(authFile);
 
     const sock = makeWASocket({
         auth: state,
         printQRInTerminal: true
     });
 
-    sock.ev.on('creds.update', saveCreds);
+    sock.ev.on('creds.update', saveState);
 
     sock.ev.on('messages.upsert', async ({ messages }) => {
         const msg = messages[0];
